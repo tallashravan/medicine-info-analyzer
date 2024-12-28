@@ -1,0 +1,9 @@
+phidata
+google-generativeai
+tavily-python
+packaging
+openai
+pillow
+streamlit
+phi
+pillow
