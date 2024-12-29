@@ -2,6 +2,7 @@ import os
 import csv
 import re
 import html
+from save_feedback import save
 
 def sanitize_input(input_text):
     """Sanitize user input to prevent XSS and SQL injection attacks."""
@@ -13,14 +14,5 @@ def sanitize_input(input_text):
 
 def save_feedback(name, feedback, rating):
     """Save feedback to a CSV file."""
-    feedback_file = "local_feedback/feedback.csv"
-    if not os.path.exists("local_feedback"):
-        os.makedirs("local_feedback")
-
-    file_exists = os.path.exists(feedback_file)
-
-    with open(feedback_file, mode="a", newline="") as file:
-        writer = csv.writer(file)
-        if not file_exists:  # Write header if file is new
-            writer.writerow(["Name", "Feedback", "Rating"])
-        writer.writerow([name, feedback, rating])
+    save(name, feedback, rating)
+    print("Feedback saved successfully!")

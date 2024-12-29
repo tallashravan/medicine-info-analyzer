@@ -134,21 +134,22 @@ with tab4:
     st.header("💬 Share Your Feedback")
     st.write("We'd love to hear your thoughts about the app! 😊")
 
-    with st.form(key="feedback_form"):
+    with st.form(key="feedback_form",clear_on_submit=True):
         name = st.text_input("Name (Optional):", max_chars=50)
         feedback = st.text_area("Your Feedback:", max_chars=200)
         rating = st.slider("Rate your experience (1 - Poor, 5 - Excellent):", 1, 5, 3)
         submit_button = st.form_submit_button(label="Submit Feedback")
 
         if submit_button:
-            sanitized_feedback = sanitize_input(feedback)
-            sanitized_name = sanitize_input(name)
+            with st.spinner("Saving Feedback... Please wait."):
+                sanitized_feedback = sanitize_input(feedback)
+                sanitized_name = sanitize_input(name)
 
-            if not sanitized_feedback:
-                st.warning("⚠️ Feedback cannot be empty. Please share your thoughts!")
-            else:
-                save_feedback(sanitized_name, sanitized_feedback, rating)
-                st.success("🎉 Thank you for your feedback! 🙌")
+                if not sanitized_feedback:
+                    st.warning("⚠️ Feedback cannot be empty. Please share your thoughts!")
+                else:
+                    save_feedback(sanitized_name, sanitized_feedback, rating)
+                    st.success("🎉 Thank you for your feedback! 🙌")
 
 ### --- SUPPORT SECTION ---
 st.markdown("---")
