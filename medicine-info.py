@@ -39,7 +39,7 @@ st.set_page_config(
 st.title("💊 AI Medicine Analyzer")
 st.header("Simplifying Medicine Insights with AI")
 st.write(
-    "Upload an image of your medicine label or prescription to get started. 📸  Want to see it in action? Explore Example Images for a quick demo! 🖼️ Curious to know more? Check out the About tab for details. ℹ️"
+    "Upload an image of your medicine label or prescription to get started. 📸 Want to see it in action? Explore Example Images for a quick demo! 🖼️ Curious to know more? Check out the About tab for details. ℹ️"
 )
 
 # Tabs for Main Upload, Example Images, and About
@@ -64,14 +64,8 @@ with tab1:
                 images=[temp_image_path]
             )
             return response.content
-        except FileNotFoundError as e:
-            st.error(f"File not found: {str(e)}")
-            return "An error occurred while analyzing the image. Please try again later."
-        except IOError as e:
-            st.error(f"IO error: {str(e)}")
-            return "An error occurred while analyzing the image. Please try again later."
         except Exception as e:
-            st.error(f"An unexpected error occurred: {str(e)}")
+            st.error(f"An error occurred while analyzing the image: {str(e)}")
             return "An error occurred while analyzing the image. Please try again later."
         finally:
             try:
@@ -86,7 +80,6 @@ with tab1:
         try:
             st.image(uploaded_file, caption="Uploaded Image", width=300)
             image = Image.open(uploaded_file)
-            image_bytes = io.BytesIO()
             image = image.convert('RGB')
             image.save(image_bytes, format='JPEG')
             image_bytes = image_bytes.getvalue()
@@ -116,18 +109,19 @@ with tab1:
             - Curious to know more? Check out the **About** tab for details. ℹ️  
             """
         )
+
     # Disclaimer
-    st.warning("💡 **Disclaimer:** This analysis provided by the AI is for informational purposes only and is not intended as medical advice.  Always consult a qualified healthcare professional for medical guidance.")
+    st.warning("💡 **Disclaimer:** This analysis provided by the AI is for informational purposes only and is not intended as medical advice. Always consult a qualified healthcare professional for medical guidance.")
 
 ### --- TAB 2: EXAMPLE IMAGES ---
 with tab2:
     st.header("Example Images")
     example_images = {
-        "Example 1": "images/benadryl.jpeg",
-        "Example 2": "images/dolo.jpeg",
+        "Example 1": "images/benadryl-1.jpeg",
+        "Example 2": "images/dolo-1.jpeg",
     }
 
-    cols = st.columns(2)
+    cols = st.columns(2,border=True)
     for idx, (label, image_path) in enumerate(example_images.items()):
         with cols[idx % 2]:
             st.image(image_path, caption=label, width=300)
@@ -142,9 +136,11 @@ with tab2:
                         with st.expander(f"Analysis Results for {label}", expanded=True):
                             st.success("Analysis Complete! Here are the details:")
                             st.markdown(result)
-    
+
     # Disclaimer
-    st.warning("💡 **Disclaimer:** This analysis provided by the AI is for informational purposes only and is not intended as medical advice.  Always consult a qualified healthcare professional for medical guidance.")
+    st.warning("💡 **Disclaimer:** This analysis provided by the AI is for informational purposes only and is not intended as medical advice. Always consult a qualified healthcare professional for medical guidance.")
+
+
 
 ### --- TAB 3: ABOUT ---
 with tab3:
@@ -156,7 +152,6 @@ with tab3:
     That's why I created this app — **AI Medicine Info Analyzer**, a **simple, efficient solution** for anyone looking for quick, reliable, and easy-to-understand information about medicines.
     """)
     
-        
     # Add a section explaining how it works
     st.subheader("How It Works 🧠💊")
     st.write("""
@@ -197,18 +192,14 @@ with tab3:
     Together, we can make understanding medication easier and more accessible for everyone. 😊
     """)
 
+### --- TAB 4: FEEDBACK ---
 with tab4:
     st.header("💬 Share Your Feedback")
     st.write("We'd love to hear your thoughts about the app! 😊")
 
     # Function to sanitize user inputs
     def sanitize_input(input_text):
-        # Escape HTML characters to prevent XSS attacks
-        sanitized_text = html.escape(input_text)
-        
-        # Further validation for special characters or unwanted patterns (like SQL injection patterns)
-        sanitized_text = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', sanitized_text)  # Remove control characters
-        # Further validation for special characters or unwanted patterns (like SQL injection patterns)
+        sanitized_text = html.escape(input_text)  # Escape HTML characters
         sanitized_text = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', sanitized_text)  # Remove control characters
         sanitized_text = re.sub(r'(--|;|\'|"|\\|\/|\*|=|<|>)', '', sanitized_text)  # Remove SQL injection patterns
         sanitized_text = re.sub(r'\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|REPLACE|RENAME|TRUNCATE|EXEC)\b', '', sanitized_text, flags=re.IGNORECASE)
@@ -217,15 +208,11 @@ with tab4:
     # Save feedback to a CSV file
     def save_feedback(name, feedback, rating):
         feedback_file = "local_feedback/feedback.csv"
-        
-        # Ensure the directory exists
         if not os.path.exists("local_feedback"):
             os.makedirs("local_feedback")
 
-        # Check if the file exists
         file_exists = os.path.exists(feedback_file)
 
-        # Write feedback data
         try:
             with open(feedback_file, mode="a", newline="") as file:
                 writer = csv.writer(file)
@@ -237,13 +224,12 @@ with tab4:
 
     # Create a feedback form
     with st.form(key="feedback_form"):
-        name = st.text_input("Name (Optional):",max_chars=50)
-        feedback = st.text_area("Your Feedback:",max_chars=100)
+        name = st.text_input("Name (Optional):", max_chars=50)
+        feedback = st.text_area("Your Feedback:", max_chars=100)
         rating = st.slider("Rate your experience (1 - Poor, 5 - Excellent):", 1, 5, 3)
         submit_button = st.form_submit_button(label="Submit Feedback")
 
-        # Input validation and sanitization
-        if submit_button is not None and submit_button:
+        if submit_button:
             # Sanitize the feedback input
             sanitized_feedback = sanitize_input(feedback)
             sanitized_name = sanitize_input(name)  # Optional Name input
@@ -254,7 +240,6 @@ with tab4:
             else:
                 save_feedback(sanitized_name, sanitized_feedback, rating)
                 st.success("🎉 Thank you for your feedback! 🙌")
-
 
 ### --- SUPPORT SECTION ---
 st.markdown("---")
@@ -268,7 +253,7 @@ st.markdown("---")
 st.markdown(
     """
     ### 🚀 Want to see more projects like this?  
-    **Follow me on GitHub** to stay updated on my latest projects on GitHub**!  👉 https://github.com/tallashravan/
+    **Follow me on GitHub** to stay updated on my latest projects! 👉 https://github.com/tallashravan/
     """
 )
 st.markdown("---")
